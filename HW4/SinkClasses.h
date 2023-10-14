@@ -5,9 +5,10 @@
 class ConsoleSink : public Sink {
 protected:
 	virtual Sink* clone() const override {
-		return DBG_NEW ConsoleSink(source);
+		return DBG_NEW ConsoleSink(*source);
 	}
 public:
+	ConsoleSink() = default;
 	ConsoleSink(DataSource& obj);
 
 	virtual void flush() const override;
@@ -18,22 +19,29 @@ protected:
 	MyString fileName;
 
 	virtual Sink* clone() const override {
-		return DBG_NEW FileSink(source, fileName);
+		return DBG_NEW FileSink(*source, fileName);
 	}
 public:
+	FileSink(const MyString& fileName);
 	FileSink(DataSource& obj, const MyString& fileName);
 
 	virtual void flush() const override;
-	void flushMax(int size) const;
 };
 
-class OutputStreamVector : public DynamicVector<Sink> {
-private:
-	DataSource& source;
+class FileSinkMaxK : public Sink {
+protected:
+	MyString fileName;
+	int K;
+
+	virtual Sink* clone() const override {
+		return DBG_NEW FileSinkMaxK(*source, fileName, K);
+	}
 public:
-	OutputStreamVector(DataSource& source);
+	FileSinkMaxK(const MyString& fileName, int maxChars);
+	FileSinkMaxK(DataSource& obj, const MyString& fileName, int maxChars);
 
-	void setSource(DataSource& newSource);
+	virtual void flush() const override;
 };
 
-void writeToStreams(const OutputStreamVector& vec);
+void writeToStreams(const DynamicVector<Sink>& vec);
+void writeToStreams(DynamicVector<Sink>& vec, DataSource& source);

@@ -1,4 +1,4 @@
-#include <iostream>
+﻿#include <iostream>
 #include "StreamClasses.h"
 #include "MyString.h"
 #include "SinkClasses.h"
@@ -17,30 +17,122 @@
 #define DBG_NEW new
 #endif
 
+int main() {
+	try {
+		//Извличане на речник: чете файл, премахва пунктуация, добавя нови редове след всяка дума,
+		//премахва дублиращите се редове, записва във файл
+#if 1
+		FileStream fSt("text.txt");
+		DynamicVector<Stream> streams;
+		streams.add(fSt);
+
+		PunctuationFilter pFil;
+		AddNewRowAfterWordFilter anrawFil;
+		RepeatingRowsFilter rrFil;
+		LexicographicalComparisonOnRowsFilter lcorFil;
+		DynamicVector<Filter> filters;
+		filters.add(pFil);
+		filters.add(anrawFil);
+		filters.add(rrFil);
+		filters.add(lcorFil);
+
+		FileSink fSink("dictionary.txt");
+		DynamicVector<Sink> sinks;
+		sinks.add(fSink);
+
+		SequenceOfOperations soo(streams, filters, sinks);
+#endif
+		//Брояч на думи във файлове: чете няколко файла, премахва пунктуация, 
+		//слага всяка дума на отделен ред, премахва дадени думи, брои срещанията
+		//и ги извежда на конзолата.
+#if 0
+		FileStream fSt1("text1.txt");
+		FileStream fSt2("text2.txt");
+		FileStream fSt3("text3.txt");
+		DynamicVector<Stream> streams1;
+		streams1.add(fSt1);
+		streams1.add(fSt2);
+		streams1.add(fSt3);
+
+		WordFilter wFil("Hello\n");
+		GetRowsFilter grFil;
+		PunctuationFilter pFil;
+		AddNewRowAfterWordFilter anrawFil;
+		DynamicVector<Filter> filters1;
+		filters1.add(pFil);
+		filters1.add(anrawFil);
+		filters1.add(wFil);
+		filters1.add(grFil); // 6
+
+		ConsoleSink cSink(nullptr);
+		DynamicVector<Sink> sinks1;
+		sinks1.add(cSink);
+
+		SequenceOfOperations soo1(streams1, filters1, sinks1);
+#endif
+		//Архивиране: чете множество файлове и ги записва в един изходен файл
+#if 0
+		FileStream fSt1("text1.txt");
+		FileStream fSt2("text2.txt");
+		FileStream fSt3("text3.txt");
+		DynamicVector<Stream> streams2;
+		streams2.add(fSt1);
+		streams2.add(fSt2);
+		streams2.add(fSt3);
+
+		DynamicVector<Filter> filters2;
+
+		FileSink fSink(nullptr, "archive.txt");
+		DynamicVector<Sink> sinks2;
+		sinks2.add(fSink);
+
+		SequenceOfOperations soo1(streams2, filters2, sinks2);
+#endif
+		//Разделяне на файлове: чете един входен файл и го разделя на файлове не по-големи от К символа
+#if 0
+		FileStream fSt("text.txt");
+		DynamicVector<Stream> streams3;
+		streams3.add(fSt);
+
+		DynamicVector<Filter> filters3;
+
+		FileSinkMaxK fSink1(nullptr, "archive.txt", 25);
+		DynamicVector<Sink> sinks3;
+		sinks3.add(fSink1);
+
+		SequenceOfOperations soo1(streams3, filters3, sinks3);
+#endif
+	}
+	catch (const std::exception& ex) {
+		std::cout << ex.what() << std::endl;
+	}
+	return 0;
+}
+
+#if 0
 int main(){
 	{
 		//int streamsCount = 3;
 		//ConsoleStream st;
 		//ConstStream cSt("testing2");
 		//FileStream fSt("text.txt");
-		//InputStreamVector vec;
+		//DynamicVector<Stream> vec;
 		//vec.add(st);
 		//vec.add(cSt);
 		//vec.add(fSt);
 		//MyString result = readFromStreams(vec);
 		//std::cout << result;
 
-		//ConstStream cSt("newTesting");
+		//ConstStream cSt("newTesting123");
 		//int sinksCount = 3;
-		//ConsoleSink s(cSt);
-		//FileSink fSink1(cSt, "fSink1.txt");
-		//FileSink fSink2(cSt, "fSink2.txt");
-		//OutputStreamVector vec1(cSt);
+		//ConsoleSink s;
+		//FileSink fSink1("fSink1.txt");
+		//FileSinkMaxK fSink2("fSink2.txt", 5);
+		//DynamicVector<Sink> vec1;
 		//vec1.add(s);
 		//vec1.add(fSink1);
 		//vec1.add(fSink2);
-		//writeToStreams(vec1);
-		//fSink1.flushMax(1);
+		//writeToStreams(vec1, cSt);
 
 		//ConstStream cSt2("nightlife\notherlife\nMy computer\nHello there\n12door life something\nEnding\n");
 		////ConstStream cSt2("Hello there\n12door life something");
@@ -74,7 +166,7 @@ int main(){
 		//s3.flush();
 
 		//ConstStream cSt4("hi hi bye there. Why dsadasdsadasdaid you do this? Stop it!");
-		//AddNewRowAfterKSymbolsFilter anraksFil(cSt4, 10); // try to fix when a word would fit by itself but not with the space
+		//AddNewRowAfterKSymbolsFilter anraksFil(cSt4, 10);
 		//ConsoleSink s3(anraksFil);
 		//s3.flush();
 
@@ -113,35 +205,36 @@ int main(){
 		//MyString result = readFromStreams(vec);
 		//std::cout << result;
 
-		ConsoleStream st;
-		ConstStream cSt3("*Hello there.\n*Hello there.\nHow are* you?\nI am good!\n*Hello there.\nHow are* you?\nTesting***\n");
-		FileStream fSt("text.txt");
-		DynamicVector<Stream> vec;
-		vec.add(st);
-		vec.add(cSt3);
-		vec.add(fSt);
+		//ConsoleStream st;
+		//ConstStream cSt3("*Hello there.\n*Hello there.\nHow are* you?\nI am good!\n*Hello there.\nHow are* you?\nTesting***\n");
+		//FileStream fSt("text.txt");
+		//DynamicVector<Stream> vec;
+		//vec.add(st);
+		//vec.add(cSt3);
+		//vec.add(fSt);
 
-		RepeatingRowsFilter rrFil(cSt3);
-		cSt3.clear();
-		WordFilter wFil(cSt3, '*');
-		cSt3.clear();
-		SequenceReplaceFilter srFil(cSt3, "Hello", "Privet");
+		//RepeatingRowsFilter rrFil(cSt3);
+		//cSt3.clear();
+		//WordFilter wFil(cSt3, '*');
+		//cSt3.clear();
+		//SequenceReplaceFilter srFil(cSt3, "Hello", "Privet");
 
-		DynamicVector<Filter> vecFil;
-		vecFil.add(rrFil);
-		vecFil.add(wFil);
-		vecFil.add(srFil);
+		//DynamicVector<Filter> vecFil;
+		//vecFil.add(rrFil);
+		//vecFil.add(wFil);
+		//vecFil.add(srFil);
 
-		ConstStream cSt("newTesting");
-		ConsoleSink s(cSt);
-		FileSink fSink1(cSt, "fSink1.txt");
-		FileSink fSink2(cSt, "fSink2.txt");
-		OutputStreamVector vec1(cSt);
-		vec1.add(s);
-		vec1.add(fSink1);
-		vec1.add(fSink2);
+		//ConstStream cSt("newTesting");
+		//ConsoleSink s(cSt);
+		//FileSink fSink1(cSt, "fSink1.txt");
+		//FileSink fSink2(cSt, "fSink2.txt");
+		//OutputStreamVector vec1(cSt);
+		//vec1.add(s);
+		//vec1.add(fSink1);
+		//vec1.add(fSink2);
 
-		SequenceOfOperations soo(vec, vecFil, vec1);
+		//SequenceOfOperations soo(vec, vecFil, vec1);
 	}
 	_CrtDumpMemoryLeaks();
 }
+#endif

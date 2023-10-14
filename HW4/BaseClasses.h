@@ -36,16 +36,17 @@ public:
 
 class Sink {
 protected:
-	DataSource& source;
+	DataSource* source = nullptr;
 
-	Sink(DataSource& obj);
+	Sink() = default;
+	Sink(DataSource* obj);
 
 	void sendToStream(std::ostream& os) const;
 	bool sendToStreamMax(std::ostream& os, int size) const;
 public:
 	virtual ~Sink() = default;
 
-	void setDataSource(DataSource& newSource);
+	void setDataSource(DataSource* newSource);
 
 	virtual void flush() const = 0;
 	virtual Sink* clone() const = 0;

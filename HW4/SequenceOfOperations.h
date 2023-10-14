@@ -11,13 +11,13 @@ private:
 	MyString filteredData;
 	DynamicVector<Stream>& streams;
 	DynamicVector<Filter>& filters;
-	OutputStreamVector& sinks;
+	DynamicVector<Sink>& sinks;
 
 	void readData();
 	void filterData();
 	void flushData();
 public:
-	SequenceOfOperations(DynamicVector<Stream>& streams, DynamicVector<Filter>& filters, OutputStreamVector& sinks);
+	SequenceOfOperations(DynamicVector<Stream>& streams, DynamicVector<Filter>& filters, DynamicVector<Sink>& sinks);
 	SequenceOfOperations(const SequenceOfOperations& other) = delete;
 	SequenceOfOperations operator=(const SequenceOfOperations& other) = delete;
 };

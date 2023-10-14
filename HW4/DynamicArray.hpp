@@ -31,7 +31,7 @@ void DynamicVector<T>::resize() {
 	}
 
 	values = tempValues;
-	capacity *= 2;
+	capacity = newCapacity;
 }
 
 template <typename T>

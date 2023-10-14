@@ -2,8 +2,6 @@
 #include <cassert>
 #include "MyString.h"
 
-constexpr int FILE_SYMBOLS_MAX_SIZE = 1024;
-
 void DataSource::validateState() const {
 	if (!isValid()) {
 		pointer = -1;
@@ -47,17 +45,20 @@ void Filter::initContent(const DataSource& obj) {
 	data = filter(std::move(temp));
 }
 
-Sink::Sink(DataSource& obj) : source(obj) {}
+Sink::Sink(DataSource* obj) : source(obj) {}
 
 void Sink::sendToStream(std::ostream& os) const {
-	source.clear();
-	sendToStreamMax(os, FILE_SYMBOLS_MAX_SIZE);
+	source->clear();
+	char ch;
+	while (source->getSymbol(ch)) {
+		os << ch;
+	}
 }
 
 bool Sink::sendToStreamMax(std::ostream& os, int size) const {
 	char ch;
 	for (int i = 1; i <= size; ++i) {
-		if (!source.getSymbol(ch)) {
+		if (!source->getSymbol(ch)) {
 			return false;
 		}
 		os << ch;
@@ -65,6 +66,6 @@ bool Sink::sendToStreamMax(std::ostream& os, int size) const {
 	return true;
 }
 
-void Sink::setDataSource(DataSource& newSource) {
+void Sink::setDataSource(DataSource* newSource) {
 	source = newSource;
 }

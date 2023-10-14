@@ -87,9 +87,11 @@ AddNewRowAfterSentenceFilter::AddNewRowAfterSentenceFilter(const DataSource& obj
 MyString AddNewRowAfterWordFilter::filter(const MyString& toFilter) const {
 	MyString res(toFilter.getSize());
 	for (int i = 0; i < toFilter.getSize(); ++i) {
-		res.pushBack(toFilter[i]);
 		if (toFilter[i] == ' ') {
 			res.pushBack('\n');
+		}
+		else {
+			res.pushBack(toFilter[i]);
 		}
 	}
 	return res;
@@ -207,7 +209,7 @@ MyString LexicographicalComparisonOnRowsFilter::filter(const MyString& toFilter)
 	for (int i = 0; i < rowsCount - 1; ++i) {
 		int currentSmallestRowInd = i;
 		for (int j = i + 1; j < rowsCount; ++j) {
-			if (strcmp(begPtr + rows[j], begPtr + currentSmallestRowInd) < 0) {
+			if (strcmp(begPtr + rows[currentSmallestRowInd], begPtr + rows[j]) > 0) {
 				currentSmallestRowInd = j;
 			}
 		}
@@ -227,7 +229,7 @@ MyString RepeatingRowsFilter::filter(const MyString& toFilter) const {
 	int rowsCount = getRowsCount(toFilter);
 	int* rows = getRows(toFilter);
 	const char* begPtr = toFilter.getC_str();
-	for (int i = 0; i < rowsCount; ++i) {
+	for (int i = 0; i < rowsCount - 1; ++i) {
 		bool exists = false;
 		// check every row before the current row
 		for (int j = 0; j < i; ++j) {
@@ -239,6 +241,16 @@ MyString RepeatingRowsFilter::filter(const MyString& toFilter) const {
 		if (!exists) {
 			res.append(toFilter.getSubstring(rows[i], getSizeOfRow(toFilter, rows[i])));
 		}
+	}
+	bool exists = false;
+	for (int i = 0; i < rowsCount - 1; ++i) {
+		if (strncmp(begPtr + rows[i], begPtr + rows[rowsCount - 1], rows[i + 1] - rows[i] - 1) == 0) {
+			exists = true;
+			break;
+		}
+	}
+	if (!exists) {
+		res.append(toFilter.getSubstring(rows[rowsCount - 1], getSizeOfRow(toFilter, rows[rowsCount - 1])));
 	}
 	delete[] rows;
 
@@ -282,8 +294,10 @@ int getRowsCount(const MyString& str) {
 	}
 
 	int count = 1;
-	while (strchr(str.getC_str(), '\n')) {
+	const char* beg = str.getC_str();
+	while (const char* curr = strchr(beg, '\n')) {
 		count++;
+		beg = curr + 1;
 	}
 	if (str[str.getSize() - 1] == '\n') { //check if '\n' is at the end
 		count--;
