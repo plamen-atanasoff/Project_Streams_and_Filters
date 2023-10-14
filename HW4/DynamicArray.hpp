@@ -1,7 +1,7 @@
 #pragma once
 
 template <typename T>
-class DynamicVector {
+class DynamicArray {
 private:
 	T** values = nullptr;
 	int size = 0;
@@ -9,10 +9,10 @@ private:
 
 	void resize();
 public:
-	DynamicVector() = default;
-	DynamicVector(const DynamicVector<T>& other) = delete;
-	DynamicVector<T>& operator=(const DynamicVector<T>& other) = delete;
-	~DynamicVector();
+	DynamicArray() = default;
+	DynamicArray(const DynamicArray<T>& other) = delete;
+	DynamicArray<T>& operator=(const DynamicArray<T>& other) = delete;
+	~DynamicArray();
 
 	void add(const T& element);
 
@@ -22,10 +22,10 @@ public:
 };
 
 template <typename T>
-void DynamicVector<T>::resize() {
+void DynamicArray<T>::resize() {
 	assert(size <= capacity);
 	int newCapacity = capacity == 0 ? 4 : capacity * 2;
-	T** tempValues = DBG_NEW T * [newCapacity];
+	T** tempValues = new T * [newCapacity];
 	for (int i = 0; i < size; ++i) {
 		tempValues[i] = values[i];
 	}
@@ -35,13 +35,7 @@ void DynamicVector<T>::resize() {
 }
 
 template <typename T>
-T& DynamicVector<T>::operator[](int pos) {
-	assert(pos >= 0 && pos < size);
-	return *values[pos];
-}
-
-template <typename T>
-DynamicVector<T>::~DynamicVector() {
+DynamicArray<T>::~DynamicArray() {
 	for (int i = 0; i < size; ++i) {
 		delete values[i];
 	}
@@ -49,7 +43,7 @@ DynamicVector<T>::~DynamicVector() {
 }
 
 template <typename T>
-void DynamicVector<T>::add(const T& element) {
+void DynamicArray<T>::add(const T& element) {
 	if (size == capacity) {
 		resize();
 	}
@@ -58,12 +52,18 @@ void DynamicVector<T>::add(const T& element) {
 }
 
 template <typename T>
-int DynamicVector<T>::getSize() const {
+int DynamicArray<T>::getSize() const {
 	return size;
 }
 
 template <typename T>
-const T& DynamicVector<T>::operator[](int pos) const {
+const T& DynamicArray<T>::operator[](int pos) const {
+	assert(pos >= 0 && pos < size);
+	return *values[pos];
+}
+
+template <typename T>
+T& DynamicArray<T>::operator[](int pos) {
 	assert(pos >= 0 && pos < size);
 	return *values[pos];
 }

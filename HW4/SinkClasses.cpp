@@ -6,15 +6,9 @@
 #include "BaseClasses.h"
 #include "DynamicArray.hpp"
 
-ConsoleSink::ConsoleSink(DataSource& obj) : Sink(&obj) {}
-
 void ConsoleSink::flush() const {
     sendToStream(std::cout);
 }
-
-FileSink::FileSink(const MyString& fileName) : fileName(fileName) {}
-
-FileSink::FileSink(DataSource& obj, const MyString& fileName) : Sink(&obj), fileName(fileName) {}
 
 void FileSink::flush() const {
     std::ofstream ofile(fileName.getC_str());
@@ -27,17 +21,9 @@ void FileSink::flush() const {
     ofile.close();
 }
 
-FileSinkMaxK::FileSinkMaxK(const MyString& fileName, int maxChars) : fileName(fileName), K(maxChars) {}
-
-FileSinkMaxK::FileSinkMaxK(DataSource& obj, const MyString& fileName, int maxChars)
-    : Sink(&obj), fileName(fileName), K(maxChars) {
-    if (maxChars <= 0) {
-        throw std::invalid_argument("maxChars must be positive!");
-    }
-}
-
 void FileSinkMaxK::flush() const {
     source->clear();
+    //struct to create the names of the files to save to
     struct {
         MyString name;
         int counter = 1;
@@ -70,13 +56,13 @@ void FileSinkMaxK::flush() const {
     }
 }
 
-void writeToStreams(const DynamicVector<Sink>& vec) {
+void writeToStreams(const DynamicArray<Sink>& vec) {
     for (int i = 0; i < vec.getSize(); ++i) {
         vec[i].flush();
     }
 }
 
-void writeToStreams(DynamicVector<Sink>& vec, DataSource& source) {
+void writeToStreams(DynamicArray<Sink>& vec, DataSource& source) {
     for (int i = 0; i < vec.getSize(); ++i) {
         vec[i].setDataSource(&source);
         vec[i].flush();

@@ -1,7 +1,8 @@
-#pragma once
+﻿#pragma once
 #include "MyString.h"
 #include "StreamClasses.h"
 
+//Замяна на един низ с друг
 class SequenceReplaceFilter : public Filter {
 protected:
 	MyString toReplace;
@@ -9,7 +10,7 @@ protected:
 
 	virtual MyString filter(const MyString& toFilter) const override;
 	virtual Filter* clone() const override {
-		return DBG_NEW SequenceReplaceFilter(*this);
+		return new SequenceReplaceFilter(*this);
 	}
 public:
 	SequenceReplaceFilter(const DataSource& obj, const MyString& toReplace, const MyString& replaceWith) 
@@ -20,23 +21,27 @@ public:
 		: toReplace(toReplace), replaceWith(replaceWith) {}
 };
 
+//Премахване на даден низ от съдържанието
+//Премахване на даден символ
+//Премахване на нови редове
 class WordFilter : public SequenceReplaceFilter {
 protected:
 	virtual Filter* clone() const override {
-		return DBG_NEW WordFilter(*this);
+		return new WordFilter(*this);
 	}
 public:
 	WordFilter(const DataSource& obj, const MyString& toRemove) : SequenceReplaceFilter(obj, toRemove, "") {}
 	WordFilter(const MyString& toRemove) : SequenceReplaceFilter(toRemove, "") {}
 };
 
+//Премахване на цели редове, които съдържат даден низ
 class RowFilter : public Filter {
 protected:
 	MyString toRemove;
 
 	virtual MyString filter(const MyString& toFilter) const override;
 	virtual Filter* clone() const override {
-		return DBG_NEW RowFilter(*this);
+		return new RowFilter(*this);
 	}
 public:
 	RowFilter(const DataSource& obj, const MyString& toRemove) : toRemove(toRemove) {
@@ -45,11 +50,12 @@ public:
 	RowFilter(const MyString& toRemove) : toRemove(toRemove) {}
 };
 
+//Премахване на пунктуация
 class PunctuationFilter : public Filter {
 protected:
 	virtual MyString filter(const MyString& toFilter) const override;
 	virtual Filter* clone() const override {
-		return DBG_NEW PunctuationFilter(*this);
+		return new PunctuationFilter(*this);
 	}
 public:
 	PunctuationFilter() = default;
@@ -58,45 +64,62 @@ public:
 	}
 };
 
+//Добавяне на нов ред след всяко изречение
 class AddNewRowAfterSentenceFilter : public Filter {
 protected:
 	virtual MyString filter(const MyString& toFilter) const override;
 	virtual Filter* clone() const override {
-		return DBG_NEW AddNewRowAfterSentenceFilter(*this);
+		return new AddNewRowAfterSentenceFilter(*this);
 	}
 public:
 	AddNewRowAfterSentenceFilter() = default;
-	AddNewRowAfterSentenceFilter(const DataSource& obj);
+	AddNewRowAfterSentenceFilter(const DataSource& obj) {
+		Filter::initContent(obj);
+	}
 };
 
+//Добавяне на нов ред след всяка дума
 class AddNewRowAfterWordFilter : public Filter {
 protected:
 	virtual MyString filter(const MyString& toFilter) const override;
 	virtual Filter* clone() const override {
-		return DBG_NEW AddNewRowAfterWordFilter(*this);
+		return new AddNewRowAfterWordFilter(*this);
 	}
 public:
 	AddNewRowAfterWordFilter() = default;
-	AddNewRowAfterWordFilter(const DataSource& obj);
+	AddNewRowAfterWordFilter(const DataSource& obj) {
+		Filter::initContent(obj);
+	}
 };
 
+//Добавяне на нов ред, така че всеки ред да не е повече от К символа, без да се разделят думи ако е възможно
 class AddNewRowAfterKSymbolsFilter : public Filter {
 protected:
 	int K;
 	virtual MyString filter(const MyString& toFilter) const override;
 	virtual Filter* clone() const override {
-		return DBG_NEW AddNewRowAfterKSymbolsFilter(*this);
+		return new AddNewRowAfterKSymbolsFilter(*this);
 	}
 public:
-	AddNewRowAfterKSymbolsFilter(int K);
-	AddNewRowAfterKSymbolsFilter(const DataSource& obj, int K);
+	AddNewRowAfterKSymbolsFilter(int K) : K(K) {
+		if (K <= 0) {
+			throw std::invalid_argument("K must be positive!");
+		}
+	}
+	AddNewRowAfterKSymbolsFilter(const DataSource& obj, int K) : K(K) {
+		if (K <= 0) {
+			throw std::invalid_argument("K must be positive!");
+		}
+		Filter::initContent(obj);
+	}
 };
 
+//Лексикографско сортиране на всички редове
 class LexicographicalComparisonOnRowsFilter : public Filter {
 protected:
 	virtual MyString filter(const MyString& toFilter) const override;
 	virtual Filter* clone() const override {
-		return DBG_NEW LexicographicalComparisonOnRowsFilter(*this);
+		return new LexicographicalComparisonOnRowsFilter(*this);
 	}
 public:
 	LexicographicalComparisonOnRowsFilter() = default;
@@ -105,11 +128,12 @@ public:
 	}
 };
 
+//Премахване на дублиращите се редове
 class RepeatingRowsFilter : public Filter {
 protected:
 	virtual MyString filter(const MyString& toFilter) const override;
 	virtual Filter* clone() const override {
-		return DBG_NEW RepeatingRowsFilter(*this);
+		return new RepeatingRowsFilter(*this);
 	}
 public:
 	RepeatingRowsFilter() = default;
@@ -118,11 +142,12 @@ public:
 	}
 };
 
+//Извежда броя редове във входните данни, броят става новото изходно съдържание
 class GetRowsFilter : public Filter {
 protected:
 	virtual MyString filter(const MyString& toFilter) const override;
 	virtual Filter* clone() const override {
-		return DBG_NEW GetRowsFilter(*this);
+		return new GetRowsFilter(*this);
 	}
 public:
 	GetRowsFilter() = default;
@@ -131,11 +156,12 @@ public:
 	}
 };
 
+//Извежда броя символи във входните данни, броят става новото изходно съдържание
 class GetSymbolsFilter : public Filter {
 protected:
 	virtual MyString filter(const MyString& toFilter) const override;
 	virtual Filter* clone() const override {
-		return DBG_NEW GetSymbolsFilter(*this);
+		return new GetSymbolsFilter(*this);
 	}
 public:
 	GetSymbolsFilter() = default;

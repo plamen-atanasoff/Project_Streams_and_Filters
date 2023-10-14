@@ -45,8 +45,6 @@ void Filter::initContent(const DataSource& obj) {
 	data = filter(std::move(temp));
 }
 
-Sink::Sink(DataSource* obj) : source(obj) {}
-
 void Sink::sendToStream(std::ostream& os) const {
 	source->clear();
 	char ch;

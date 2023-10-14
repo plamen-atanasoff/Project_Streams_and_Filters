@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <iostream>
 #include <cassert>
 #include "MyString.h"
@@ -6,7 +6,7 @@
 class DataSource {
 protected:
 	MyString data;
-	mutable int pointer = 0;
+	mutable int pointer = 0; //pointer to the current symbol of data
 
 	void validateState() const;
 public:
@@ -17,6 +17,9 @@ public:
 	bool isValid() const;
 };
 
+//Потребителят може да имплементира свои обекти, които изходи или източници на съдържание.
+//За да работят с останалата част от кода трябва да наследят съответно Stream или Sink 
+//и да предефинират съответните им чисто виртуални методи.
 class Stream : public DataSource {
 protected:
 	void readFromStream(std::istream& is);
@@ -39,7 +42,7 @@ protected:
 	DataSource* source = nullptr;
 
 	Sink() = default;
-	Sink(DataSource* obj);
+	Sink(DataSource* obj) : source(obj) {}
 
 	void sendToStream(std::ostream& os) const;
 	bool sendToStreamMax(std::ostream& os, int size) const;

@@ -3,6 +3,7 @@
 #include <cassert>
 #include <cctype>
 #include <utility>
+#include <exception>
 
 MyString SequenceReplaceFilter::filter(const MyString& toFilter) const {
 	int toFilterSize = toFilter.getSize();
@@ -24,22 +25,6 @@ MyString SequenceReplaceFilter::filter(const MyString& toFilter) const {
 MyString RowFilter::filter(const MyString& toFilter) const {
 	int toFilterSize = toFilter.getSize();
 	MyString res(toFilterSize);
-	//const char* begPtr = toFilter.getC_str();
-	//const char* currPtr = nullptr;
-	//while (currPtr = strchr(begPtr, '\n')) {
-	//	const char* currOccurence = strstr(begPtr, toRemove.getC_str());
-	//	if (currOccurence && currPtr - currOccurence > 0) { 
-	//		//toRemove exists and is in current row
-	//	}
-	//	else {
-	//		res.append(toFilter.getSubstring(begPtr - toFilter.getC_str(), currPtr - begPtr + 1));
-	//	}
-	//	begPtr = currPtr + 1;
-	//}
-	//const char* occurence = strstr(begPtr, toRemove.getC_str());
-	//if (!occurence) {
-	//	res.append(toFilter.getSubstring(begPtr - toFilter.getC_str(), (toFilter.getC_str() + toFilter.getSize() - 1) - begPtr));
-	//}
 	int currStartPos = 0;
 	for (int i = 0; i < toFilterSize; ++i) {
 		if (toFilter[i] == '\n') {
@@ -51,7 +36,7 @@ MyString RowFilter::filter(const MyString& toFilter) const {
 	}
 	if (currStartPos == toFilterSize) { //all data is filtered
 		return res;
-	} //data does not end with \n and last row needs to be added
+	} //data does not end with \n and last row needs to be appended
 	else if (!toFilter.substringExists(toRemove, currStartPos, toFilterSize)) {
 		res.append(toFilter.getSubstring(currStartPos, toFilterSize - currStartPos));
 	}
@@ -80,10 +65,6 @@ MyString AddNewRowAfterSentenceFilter::filter(const MyString& toFilter) const {
 	return res;
 }
 
-AddNewRowAfterSentenceFilter::AddNewRowAfterSentenceFilter(const DataSource& obj) {
-	initContent(obj);
-}
-
 MyString AddNewRowAfterWordFilter::filter(const MyString& toFilter) const {
 	MyString res(toFilter.getSize());
 	for (int i = 0; i < toFilter.getSize(); ++i) {
@@ -97,25 +78,21 @@ MyString AddNewRowAfterWordFilter::filter(const MyString& toFilter) const {
 	return res;
 }
 
-AddNewRowAfterWordFilter::AddNewRowAfterWordFilter(const DataSource& obj) {
-	initContent(obj);
-}
-
 MyString AddNewRowAfterKSymbolsFilter::filter(const MyString& toFilter) const {
 	MyString res(toFilter.getSize());
 	const char* begPtr = toFilter.getC_str();
 	const char* currPtr = nullptr;
 	int remainingSymbols = K;
 	while (currPtr = strchr(begPtr, ' ')) {
-		int lenghtOfCurrWord = currPtr - begPtr;
+		int lenghtOfCurrWord = static_cast<int>(currPtr - begPtr);
 		if (remainingSymbols > lenghtOfCurrWord) {
-			res.append(toFilter.getSubstring(begPtr - toFilter.getC_str(), lenghtOfCurrWord));
+			res.append(toFilter.getSubstring(static_cast<int>(begPtr - toFilter.getC_str()), lenghtOfCurrWord));
 			res.pushBack(' ');
 			remainingSymbols -= lenghtOfCurrWord + 1;
 			begPtr += static_cast<size_t>(lenghtOfCurrWord) + 1;
 		}
 		else if (remainingSymbols == lenghtOfCurrWord) {
-			res.append(toFilter.getSubstring(begPtr - toFilter.getC_str(), lenghtOfCurrWord));
+			res.append(toFilter.getSubstring(static_cast<int>(begPtr - toFilter.getC_str()), lenghtOfCurrWord));
 			res.pushBack('\n');
 			res.pushBack(' ');
 			remainingSymbols = K - 1;
@@ -124,14 +101,14 @@ MyString AddNewRowAfterKSymbolsFilter::filter(const MyString& toFilter) const {
 		else {
 			if (lenghtOfCurrWord < K) {
 				res.pushBack('\n');
-				res.append(toFilter.getSubstring(begPtr - toFilter.getC_str(), lenghtOfCurrWord));
+				res.append(toFilter.getSubstring(static_cast<int>(begPtr - toFilter.getC_str()), lenghtOfCurrWord));
 				res.pushBack(' ');
 				remainingSymbols = K - (lenghtOfCurrWord + 1);
 				begPtr += static_cast<size_t>(lenghtOfCurrWord) + 1;
 			}
 			else if (lenghtOfCurrWord == K) {
 				res.pushBack('\n');
-				res.append(toFilter.getSubstring(begPtr - toFilter.getC_str(), lenghtOfCurrWord));
+				res.append(toFilter.getSubstring(static_cast<int>(begPtr - toFilter.getC_str()), lenghtOfCurrWord));
 				res.pushBack('\n');
 				res.pushBack(' ');
 				remainingSymbols = K - 1;
@@ -139,9 +116,9 @@ MyString AddNewRowAfterKSymbolsFilter::filter(const MyString& toFilter) const {
 			}
 			else {
 				while (lenghtOfCurrWord > K) {
-					lenghtOfCurrWord = currPtr - begPtr;
+					lenghtOfCurrWord = static_cast<int>(currPtr - begPtr);
 					int temp = lenghtOfCurrWord > K ? remainingSymbols : lenghtOfCurrWord;
-					res.append(toFilter.getSubstring(begPtr - toFilter.getC_str(), temp));
+					res.append(toFilter.getSubstring(static_cast<int>(begPtr - toFilter.getC_str()), temp));
 					if (temp == remainingSymbols) {
 						res.pushBack('\n');
 						remainingSymbols = K;
@@ -163,40 +140,13 @@ MyString AddNewRowAfterKSymbolsFilter::filter(const MyString& toFilter) const {
 
 	const char* endPtr = toFilter.getC_str() + toFilter.getSize();
 	while (begPtr < endPtr) {
-		int temp = endPtr - begPtr > K ? K : endPtr - begPtr;
-		res.append(toFilter.getSubstring(begPtr - toFilter.getC_str(), temp));
+		int temp = static_cast<int>(endPtr - begPtr > K ? K : endPtr - begPtr);
+		res.pushBack('\n');
+		res.append(toFilter.getSubstring(static_cast<int>(begPtr - toFilter.getC_str()), temp));
 		res.pushBack('\n');
 		begPtr += temp;
 	}
-
-	/*int counter = 1;
-	int currWordStart = 0;
-	for (int i = 0; i < toFilter.getSize(); ++i, ++counter) {
-		int lenghtOfCurrWord = i - currWordStart + 1;
-		if (toFilter[i] == ' ') {
-			res.append(toFilter.getSubstring(currWordStart, lenghtOfCurrWord));
-			currWordStart = i + 1;
-		}
-		if (counter == K) {
-			lenghtOfCurrWord = i - currWordStart + 1;
-			if (lenghtOfCurrWord == K) {
-				res.append(toFilter.getSubstring(currWordStart, lenghtOfCurrWord));
-				currWordStart = i + 1;
-			}
-			res.pushBack('\n');
-			counter = i - currWordStart + 1;
-		}
-	}
-	if (currWordStart < toFilter.getSize()) {
-		res.append(toFilter.getSubstring(currWordStart, toFilter.getSize() - currWordStart));
-	}*/
 	return res;
-}
-
-AddNewRowAfterKSymbolsFilter::AddNewRowAfterKSymbolsFilter(int K) : K(K) {}
-
-AddNewRowAfterKSymbolsFilter::AddNewRowAfterKSymbolsFilter(const DataSource& obj, int K) : K(K) {
-	initContent(obj);
 }
 
 MyString LexicographicalComparisonOnRowsFilter::filter(const MyString& toFilter) const {
@@ -206,6 +156,7 @@ MyString LexicographicalComparisonOnRowsFilter::filter(const MyString& toFilter)
 	int rowsCount = getRowsCount(toFilter);
 	int* rows = getRows(toFilter);
 	const char* begPtr = toFilter.getC_str();
+	//sorting using selection sort
 	for (int i = 0; i < rowsCount - 1; ++i) {
 		int currentSmallestRowInd = i;
 		for (int j = i + 1; j < rowsCount; ++j) {
@@ -231,7 +182,7 @@ MyString RepeatingRowsFilter::filter(const MyString& toFilter) const {
 	const char* begPtr = toFilter.getC_str();
 	for (int i = 0; i < rowsCount - 1; ++i) {
 		bool exists = false;
-		// check every row before the current row
+		// check if every row before the current row is unique
 		for (int j = 0; j < i; ++j) {
 			if (strncmp(begPtr + rows[i], begPtr + rows[j], rows[i + 1] - rows[i]) == 0) {
 				exists = true;
@@ -242,6 +193,7 @@ MyString RepeatingRowsFilter::filter(const MyString& toFilter) const {
 			res.append(toFilter.getSubstring(rows[i], getSizeOfRow(toFilter, rows[i])));
 		}
 	}
+	//check if the last row is unique
 	bool exists = false;
 	for (int i = 0; i < rowsCount - 1; ++i) {
 		if (strncmp(begPtr + rows[i], begPtr + rows[rowsCount - 1], rows[i + 1] - rows[i] - 1) == 0) {
@@ -278,7 +230,7 @@ int* getRows(const MyString& str) {
 	int rowsCount = getRowsCount(str);
 
 	// find rows' starting indices
-	int* rows = DBG_NEW int[rowsCount];
+	int* rows = new int[rowsCount];
 	rows[0] = 0;
 	for (int currSentenceStartInd = 0, arrIndex = 1; currSentenceStartInd < str.getSize() - 1; ++currSentenceStartInd) {
 		if (str[currSentenceStartInd] == '\n') {

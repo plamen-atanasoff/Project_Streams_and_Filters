@@ -29,7 +29,7 @@ FileStream::FileStream(const char* fileName) {
 	readFromStream(ifile);
 }
 
-MyString readFromStreams(const DynamicVector<Stream>& vec) {
+MyString readFromStreams(const DynamicArray<Stream>& vec) {
     MyString res;
     for (int i = 0; i < vec.getSize(); ++i) {
         char ch;

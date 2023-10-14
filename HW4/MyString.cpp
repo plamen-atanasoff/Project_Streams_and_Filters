@@ -17,7 +17,7 @@ int MyString::calculateCapacity(int size) const {
 
 void MyString::copyFrom(const MyString& other) {
     if (other.str) {
-        char* newStr = DBG_NEW char[other.capacity];
+        char* newStr = new char[other.capacity];
         strcpy(newStr, other.str);
         delete[] str;
         str = newStr;
@@ -33,7 +33,7 @@ void MyString::copyFrom(const MyString& other) {
 
 void MyString::resize(int newCapacity) {
     assert(newCapacity > 0);
-    char* newStr = DBG_NEW char[newCapacity];
+    char* newStr = new char[newCapacity];
     if (str) {
         strcpy(newStr, str);
     }
@@ -48,14 +48,14 @@ void MyString::resize() {
 }
 
 MyString::MyString(int size) : capacity(calculateCapacity(size)) {
-    str = DBG_NEW char[capacity];
+    str = new char[capacity];
     str[0] = '\0';
 }
 
 MyString::MyString(const char* str) {
     size = strlen(str);
     capacity = calculateCapacity(size);
-    this->str = DBG_NEW char[capacity];
+    this->str = new char[capacity];
     strcpy(this->str, str);
 }
 

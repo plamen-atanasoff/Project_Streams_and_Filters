@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "MyString.h"
 #include "StreamClasses.h"
 #include "FilterClasses.h"
@@ -6,18 +6,19 @@
 #include "BaseClasses.h"
 #include "DynamicArray.hpp"
 
+//Трябва да има начин да се групират вход, множество трансформации и изход в поредици от задачи.
 class SequenceOfOperations {
 private:
 	MyString filteredData;
-	DynamicVector<Stream>& streams;
-	DynamicVector<Filter>& filters;
-	DynamicVector<Sink>& sinks;
+	DynamicArray<Stream>& streams;
+	DynamicArray<Filter>& filters;
+	DynamicArray<Sink>& sinks;
 
 	void readData();
 	void filterData();
 	void flushData();
 public:
-	SequenceOfOperations(DynamicVector<Stream>& streams, DynamicVector<Filter>& filters, DynamicVector<Sink>& sinks);
+	SequenceOfOperations(DynamicArray<Stream>& streams, DynamicArray<Filter>& filters, DynamicArray<Sink>& sinks);
 	SequenceOfOperations(const SequenceOfOperations& other) = delete;
 	SequenceOfOperations operator=(const SequenceOfOperations& other) = delete;
 };
